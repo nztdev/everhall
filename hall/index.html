@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>Everhall</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="stylesheet" href="../src/ui/style.css"></head><body>
+<canvas id="c"></canvas>
+<div id="intro"><h1 id="iname"></h1><p id="isub"></p><button id="enter">Enter the hall</button></div>
+<div id="hud"></div>
+<div id="room"></div>
+<div id="joy"><div id="jk"></div></div><div id="hint">Left thumb: walk · drag elsewhere: look · tap an exhibit to open it</div>
+<div id="panel"><button id="x" aria-label="Close">✕</button><div class="tag" id="ptag"></div><h2 id="ptitle"></h2><div id="pdate" style="color:var(--mut)"></div><div id="pbody"></div><p id="pcap"></p><div class="src" id="psrc"></div></div>
+<div id="ed"></div>
+<div id="simple"><div id="slist"></div></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script>const QS=new URLSearchParams(location.search),VISITOR=!!QS.get("src"),HALL={id:QS.get("id")};</script>
+<script src="../src/data.js"></script>
+<script src="../src/themes/themes.js"></script>
+<script src="../src/engine/derive.js"></script>
+<script src="../src/world/renderer.js"></script>
+<script src="../src/world/world.js"></script>
+<script src="../src/world/audio.js"></script>
+<script src="../src/ui/ui.js"></script>
+<script src="../src/world/nav.js"></script>
+<script src="../src/world/loop.js"></script>
+<script src="../src/store/store.js"></script>
+<script src="../src/ui/editor.js"></script>
+<script src="../src/boot.js"></script>
+</body></html>
