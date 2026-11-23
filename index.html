@@ -9,32 +9,38 @@ main{max-width:720px;margin:auto}h1{font-weight:400;letter-spacing:.08em;margin:
 .r{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
 button,.b,.lb{font:inherit;font-size:14px;background:#0008;color:var(--fg);border:1px solid #ffffff30;border-radius:999px;padding:5px 14px;cursor:pointer;text-decoration:none;display:inline-block}
 button:hover,.b:hover,.lb:hover{border-color:var(--ac)}.p{border-color:var(--ac);color:var(--ac)}
+.sp{display:flex;gap:14px;text-align:left;width:100%;border-radius:12px;padding:12px;margin:8px 0;align-items:center;background:var(--pn)}.ic svg{width:48px;height:48px;fill:none;stroke:var(--ac);stroke-width:2;display:block}.sp small{color:var(--ac)}
 input[type=text]{width:100%;box-sizing:border-box;background:#0008;color:var(--fg);border:1px solid #ffffff30;border-radius:8px;padding:8px 10px;font:inherit;font-size:14px;margin:6px 0}
 </style></head><body><main>
 <h1>EVERHALL</h1><p class="m">Every life leaves something worth remembering. Give it a place.</p>
 <div class="r"><button class="p" id="new">+ New hall</button><label class="lb">Import file<input type="file" id="imp" accept=".json" hidden></label></div>
+<div id="chooser" hidden></div>
 <h2>Your halls</h2><div id="grid"></div>
 <p class="m">Halls are stored in this browser. Export one to keep a backup or to share it.</p>
 <h2>Demo</h2>
-<div class="c"><b>Pablo Sanchez Niño</b><span class="m">Goalkeeper · a real hall, 19 pieces</span><div class="r"><a class="b p" href="hall/?src=../demo/pablo.everhall.json">Enter the hall</a></div></div>
+<div class="c"><b>Pablo Sanchez Niño</b><span class="m">Goalkeeper · a real hall, 19 pieces</span><div class="r"><a class="b p" href="hall/?src=../demo/pablo.everhall.json">Enter the hall</a></div>
+<span class="m">Same hall, other spaces:</span><div class="r"><a class="b" href="hall/?src=../demo/pablo.everhall.json&space=cabinet">Cabinet</a><a class="b" href="hall/?src=../demo/pablo.everhall.json&space=rotunda">Rotunda</a><a class="b" href="hall/?src=../demo/pablo.everhall.json&space=courtyard">Courtyard</a></div></div>
 <h2>Open or share by link</h2>
 <p class="m">Host an exported hall file anywhere (for example in this repository's <code>halls</code> folder) and paste its address here to get a link anyone can open.</p>
 <input type="text" id="u" placeholder="https://…/my-hall.everhall.json">
 <div class="r"><button id="open">Open</button><button id="copy">Copy viewer link</button></div>
 </main>
+<script src="src/spaces/catalog.js"></script>
 <script src="src/store/store.js"></script>
 <script>
 const $=s=>document.querySelector(s),g=$("#grid"),esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 async function render(){let hs=[];try{hs=await Store.list()}catch(e){}
  g.innerHTML=hs.length?"":'<p class="m">No halls yet. Create one or import a file.</p>';
  hs.forEach(h=>{const d=document.createElement("div");d.className="c";
-  d.innerHTML=`<b>${esc(h.name)}</b><span class="m">${esc(h.sub)} · ${h.n} pieces</span><div class="r"><a class="b p" href="hall/?id=${h.id}">Open</a><button data-a="dup">Duplicate</button><button data-a="exp">Export</button><button data-a="del">Delete</button></div>`;
+  d.innerHTML=`<b>${esc(h.name)}</b><span class="m">${esc(h.sub)} · ${h.n} pieces · ${(Spaces[h.space]||Spaces.gallery).name}</span><div class="r"><a class="b p" href="hall/?id=${h.id}">Open</a><button data-a="dup">Duplicate</button><button data-a="exp">Export</button><button data-a="del">Delete</button></div>`;
   d.onclick=async e=>{const a=e.target.dataset.a;if(!a)return;
    if(a=="dup")await Store.duplicate(h.id);
    else if(a=="del"){if(!confirm("Delete this hall?"))return;await Store.remove(h.id)}
    else{Store.download(h.name,await Store.inline(await Store.get(h.id)));return}
    render()};g.appendChild(d)})}
-$("#new").onclick=async()=>{const n=prompt("Name this hall");if(!n)return;location.href="hall/?id="+await Store.create(Store.blank(n))};
+const ch=$("#chooser");
+$("#new").onclick=()=>{ch.hidden=!ch.hidden;if(!ch.hidden)ch.innerHTML='<p class="m">Choose a space, from small and simple to large and open. The range shows how many pieces each holds well.</p>'+spaceList().map(s=>`<button class="sp" data-id="${s.id}"><span class="ic">${s.icon}</span><span><b>${s.name}</b><br><span class="m">${s.desc}</span><br><small>Holds ${s.min}\u2013${s.rec} pieces well</small></span></button>`).join("")};
+ch.onclick=async e=>{const b=e.target.closest(".sp");if(!b)return;const n=prompt("Name this hall");if(!n)return;location.href="hall/?id="+await Store.create(Store.blank(n,b.dataset.id))};
 $("#imp").onchange=async e=>{try{const o=Store.valid(JSON.parse(await e.target.files[0].text()));location.href="hall/?id="+await Store.create(o)}catch(x){alert("That file isn't a valid hall.")}};
 const link=()=>{const u=$("#u").value.trim();return u?new URL("hall/",location.href).href+"?src="+encodeURIComponent(u):""};
 $("#open").onclick=()=>{const l=link();if(l)location.href=l};

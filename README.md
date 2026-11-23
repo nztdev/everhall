@@ -25,5 +25,22 @@ Other hosts need to allow cross-origin requests for the file. GitHub Pages serve
 Each item: `id, type (wall|pedestal|screen|text|audio), group (the room), title, cap, date, src, hero?, img?, ar?, yt?, glb?, credit?, range?`.
 `glb` may be a URL, relative to the hall file, of a 3D model shown on a pedestal.
 
+## Spaces (modular worlds)
+A hall's content is separate from the space that shows it. Pick a space when you create a hall, or switch it any time in the editor. They run from small and simple to large and open, and each declares how many pieces it holds well.
+
+| Space | What it is | Holds well | Limit |
+|---|---|---|---|
+| The Cabinet | One small, intimate room | 1-8 | 10 |
+| The Rotunda | One round hall, monument at the centre, story around the wall | 6-24 | 32 |
+| The Gallery | A walk through chapter rooms, each with a centrepiece | 9-36 | 48 |
+| The Courtyard | Open-air garden of stelae and monuments | 16-60 | 72 |
+
+These ranges are first estimates; tune them in `src/spaces/catalog.js` after testing. The editor shows a capacity note and suggests a better fit when the piece count is outside the range. Preview any hall in any space by adding `&space=rotunda` (or `cabinet`, `gallery`, `courtyard`) to the viewer link.
+
+### Adding a space
+1. Add an entry (id, name, tier, min/rec/max, description, icon) to `src/spaces/catalog.js`.
+2. Add a builder that attaches six functions to it, as in `src/spaces/gallery.js` and `radial.js`: `layout(data)` returns the chapter areas, `build(areas)` creates the geometry and fills `focus`/`OBS`, and `areaAt`, `entry`, `route`, `collide` handle navigation.
+3. Load the file in `hall/index.html`. The library chooser and the editor pick it up from the catalogue.
+
 ## Known limits
 Storage is local to one browser until a backend adapter is added. Embedded YouTube needs a real host. Keep photos around 900 px wide and models small for phones.
