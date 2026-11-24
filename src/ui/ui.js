@@ -1,7 +1,7 @@
 /* ===== 7. HUD, PANEL, SIMPLE VIEW ===== */
 function btn(t,f){const b=document.createElement("button");b.textContent=t;b.onclick=f;return b}
 function buildHud(){const h=$("#hud");h.innerHTML="";
- rooms.forEach((r,i)=>h.appendChild(btn(r.name,()=>walkTo(0,B[i]-3,0,0))));
+ rooms.forEach((r,i)=>h.appendChild(btn(r.name,()=>goArea(i))));
  h.appendChild(btn("Theme: "+th.label,()=>{themeKey=themeKey=="gallery"?"noir":"gallery";build()}));
  h.appendChild(btn(muted?"Sound off":"Sound on",e=>{muted=!muted;if(master)master.gain.value=muted?0:.5;e.target.textContent=muted?"Sound off":"Sound on"}));
  if(!VISITOR)h.appendChild(btn("Edit",()=>{renderEd();ED.style.display="block"}));h.appendChild(btn("Simple view",()=>{$("#simple").style.display="block"}));if(VISITOR)h.appendChild(btn("Save a copy",saveCopy))}

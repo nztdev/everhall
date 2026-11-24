@@ -10,7 +10,8 @@ function refresh(save){build();simple();$("#iname").textContent=DATA.name;$("#is
 function renderEd(){
  let h=`<div class="eh"><b>Hall editor</b><span><button data-a="export">Export</button><button data-a="import">Import</button><a class="bt" href="../">Library</a><button data-a="close">✕</button></span></div>
 <label>Name<input data-f="name" value="${esc(DATA.name)}"></label><label>Subtitle<input data-f="sub" value="${esc(DATA.sub)}"></label>
-<label>Theme<select data-f="theme">${Object.keys(THEMES).map(k=>`<option value="${k}"${k==themeKey?" selected":""}>${THEMES[k].label}</option>`).join("")}</select></label>`;
+<label>Theme<select data-f="theme">${Object.keys(THEMES).map(k=>`<option value="${k}"${k==themeKey?" selected":""}>${THEMES[k].label}</option>`).join("")}</select></label>
+<label>Space<select data-f="space">${spaceList().map(s=>`<option value="${s.id}"${s.id==DATA.space?" selected":""}>${s.name}</option>`).join("")}</select></label>${capHtml()}`;
  groups().forEach((g,gi)=>{const n=g.items.length;
   h+=`<div class="rm"><div class="rh"><input data-r="${gi}" data-f="gname" value="${esc(g.name)}"><button data-a="rup" data-r="${gi}">↑</button><button data-a="rdn" data-r="${gi}">↓</button></div>
 <input data-r="${gi}" data-f="range" placeholder="Label, e.g. 2012 – 2015" value="${esc(g.items[0].range||"")}">
@@ -20,11 +21,11 @@ function renderEd(){
   h+=`<div class="ar"><label class="bt">+ Photos<input type="file" accept="image/*" multiple hidden data-a="photo" data-r="${gi}"></label><button data-a="vid" data-r="${gi}">+ Video</button><button data-a="txt" data-r="${gi}">+ Plaque</button></div></div>`});
  ED.innerHTML=h+`<button data-a="room" style="margin-top:12px">+ New room</button><input type="file" accept=".json" hidden id="imp">`}
 ED.addEventListener("input",e=>{const t=e.target,f=t.dataset.f;if(!f)return;const v=t.value,r=+t.dataset.r;
- if(f=="name")DATA.name=v;else if(f=="sub")DATA.sub=v;else if(f=="theme")themeKey=DATA.theme=v;
+ if(f=="name")DATA.name=v;else if(f=="sub")DATA.sub=v;else if(f=="theme")themeKey=DATA.theme=v;else if(f=="space"){DATA.space=v;px=0;pz=doorsOpen?-2:9;yaw=0;pitch=0;path=[]}
  else if(f=="gname"){const gs=groups();if(!v.trim()||gs.some((x,i)=>i!=r&&x.name==v))return;gs[r].items.forEach(i=>i.group=v)}
  else if(f=="range"){const g=groups()[r];g.items.forEach(i=>delete i.range);g.items[0].range=v}
  else{const it=DATA.items.find(i=>i.id==t.dataset.id);if(!it)return;if(f=="yt"){const y=ytId(v);if(!y)return;it.yt=y}else it[f]=v}
- clearTimeout(edT);edT=setTimeout(()=>refresh(),350)});
+ clearTimeout(edT);edT=setTimeout(()=>{refresh();if(f=="space")renderEd()},350)});
 ED.addEventListener("click",e=>{const t=e.target.closest("button");if(!t)return;const a=t.dataset.a,gs=groups(),r=+t.dataset.r,id=+t.dataset.id,g=gs[r];
  const mine=()=>gs.find(x=>x.items.some(i=>i.id==id));
  const mv=d=>{const q=mine(),rg=q.items[0].range,k=q.items.findIndex(i=>i.id==id),j=k+d;if(j<0||j>=q.items.length)return;q.items.forEach(i=>delete i.range);[q.items[k],q.items[j]]=[q.items[j],q.items[k]];q.items[0].range=rg;flat(gs)};
@@ -46,6 +47,9 @@ ED.addEventListener("change",async e=>{const t=e.target;
 function shrink(f){return new Promise((ok,no)=>{const im=new Image(),u=URL.createObjectURL(f);im.onload=()=>{const s=Math.min(1,900/Math.max(im.width,im.height)),c=cvs(Math.round(im.width*s),Math.round(im.height*s));c.getContext("2d").drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);const k="u"+Date.now().toString(36)+Math.random().toString(36).slice(2,5);IMG[k]=c.toDataURL("image/jpeg",.76);ok({k,ar:+(c.width/c.height).toFixed(3)})};im.onerror=no;im.src=u})}
 function snap(){const im={};DATA.items.forEach(i=>{if(i.img)im[i.img]=IMG[i.img]});return{v:1,data:DATA,images:im}}
 async function exp(){Store.download(DATA.name||"hall",await Store.inline(snap()))}
-function load(o){Object.assign(IMG,o.images||{});DATA.name=o.data.name||"Untitled";DATA.sub=o.data.sub||"";DATA.items=o.data.items;themeKey=THEMES[o.data.theme]?o.data.theme:"gallery";DATA.theme=themeKey;loadModels()}
+function load(o){Object.assign(IMG,o.images||{});DATA.name=o.data.name||"Untitled";DATA.sub=o.data.sub||"";DATA.items=o.data.items;themeKey=THEMES[o.data.theme]?o.data.theme:"gallery";DATA.theme=themeKey;DATA.space=Spaces[o.data.space]?o.data.space:"gallery";loadModels()}
 function imp(f){f.text().then(t=>{const o=JSON.parse(t);if(!o.data||!Array.isArray(o.data.items)||!o.data.items.length)throw 0;load(o);renderEd();refresh()}).catch(()=>alert("That file isn't a valid hall."))}
 function persist(){if(!HALL.id)return;clearTimeout(pt);pt=setTimeout(()=>Store.save(HALL.id,snap()).catch(()=>{}),600)}
+function capHtml(){const n=DATA.items.length,s=Spaces[DATA.space]||Spaces.gallery,f=spaceFit(n);let t=`${n} pieces. ${s.name} holds ${s.min}\u2013${s.rec} well.`,c="var(--mut)";
+ if(n>s.max){t+=` Over its limit of ${s.max}: it will feel crowded.`;c="#e99"}else if(n>s.rec){t+=" Above the recommended range.";c="#eb9"}else if(n<s.min)t+=" It may feel empty.";
+ if(f.id!=s.id)t+=` Suggested: ${f.name}.`;return`<small style="color:${c}">${t}</small>`}

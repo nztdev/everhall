@@ -1,17 +1,11 @@
 /* ===== 8. NAVIGATION ===== */
 let px=0,pz=9,yaw=0,pitch=0,yawT=null,pitT=0,path=[],keys={};
-const roomAt=z=>{for(let i=0;i<rooms.length;i++)if(z<=B[i]&&z>B[i+1])return i;return -1};
-function walkTo(x,z,yw,pt){
- const a=roomAt(pz),b=roomAt(z);path=[];
- if(a!=b&&a>=0&&b>=0){path.push([0,pz]);if(a<b)for(let k=a+1;k<=b;k++)path.push([0,B[k]-1]);else for(let k=a;k>b;k--)path.push([0,B[k]+1])}
- else if(a<0&&b>=0){path.push([0,0.5],[0,-1.5])}
- path.push([x,z]);
- yawT=yw===undefined?null:yw;pitT=pt||0}
-function collide(ox,oz){
- const hw=W/2-.6;px=Math.max(-hw,Math.min(hw,px));
- pz=Math.min(pz,14);pz=Math.max(pz,doorsOpen?B[B.length-1]+.6:1.4);
- B.forEach(b=>{if(Math.abs(px)>DOOR-.15&&Math.abs(pz-b)<.35)pz=oz>b?b+.35:b-.35});
- rooms.forEach(r=>{const dx=px,dz=pz-r.hz,d=Math.hypot(dx,dz);if(d<1.15&&d>.001){const nx=Math.abs(dx)<.6?dx+(dx>=0?.03:-.03):dx,nd=Math.hypot(nx,dz);px=nx/nd*1.15;pz=r.hz+dz/nd*1.15}})}
+const SPACE=()=>Spaces[DATA.space]||Spaces.gallery;
+const areaAt=(x,z)=>SPACE().areaAt(x,z);
+function walkTo(x,z,yw,pt){path=SPACE().route(px,pz,x,z);path.push([x,z]);yawT=yw===undefined?null:yw;pitT=pt||0}
+function goArea(i){const a=(rooms[i]&&rooms[i].entry)||SPACE().entry(i);walkTo(a.x,a.z,a.yaw,0)}
+function obst(){OBS.forEach(o=>{const dx=px-o.x,dz=pz-o.z,d=Math.hypot(dx,dz);if(d<o.r&&d>.001){const nx=Math.abs(dx)<.6?dx+(dx>=0?.03:-.03):dx,nd=Math.hypot(nx,dz);px=o.x+nx/nd*o.r;pz=o.z+dz/nd*o.r}})}
+function collide(ox,oz){SPACE().collide(ox,oz)}
 const cv=$("#c"),ptr={},JR=55,jel=$("#joy"),jk=$("#jk");let joy=null;
 cv.addEventListener("pointerdown",e=>{cv.setPointerCapture(e.pointerId);
  if(e.pointerType=="touch"&&doorsOpen&&!joy&&e.clientX<innerWidth*.45&&e.clientY>innerHeight*.3){joy={id:e.pointerId,x:e.clientX,y:e.clientY,dx:0,dy:0,m:0,t:performance.now()};jel.style.cssText=`display:block;left:${e.clientX-JR}px;top:${e.clientY-JR}px`;jk.style.transform="";return}

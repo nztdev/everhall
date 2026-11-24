@@ -5,9 +5,9 @@ const Store=(()=>{
  const toData=u=>fetch(u).then(r=>{if(!r.ok)throw 0;return r.blob()}).then(b=>new Promise(ok=>{const f=new FileReader();f.onload=()=>ok(f.result);f.readAsDataURL(b)}));
  const S={
   uid:()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6),
-  blank:n=>({v:1,data:{name:n,sub:"Your story",theme:"gallery",items:[{id:1,type:"text",group:"Room 1",date:"",title:"Welcome",cap:"Open Edit to add photos, videos and plaques.",src:"manual"}]},images:{}}),
+  blank:(n,sp)=>({v:1,data:{name:n,sub:"Your story",theme:"gallery",space:sp||"gallery",items:[{id:1,type:"text",group:"Room 1",date:"",title:"Welcome",cap:"Open Edit to add photos, videos and plaques.",src:"manual"}]},images:{}}),
   valid(o){if(!(o&&o.data&&Array.isArray(o.data.items)&&o.data.items.length))throw new Error("invalid hall");return o},
-  list:()=>tx("readonly",s=>s.getAll()).then(a=>a.map(r=>({id:r.id,name:r.name,sub:r.sub,n:r.snap.data.items.length,updated:r.updated})).sort((a,b)=>b.updated-a.updated)),
+  list:()=>tx("readonly",s=>s.getAll()).then(a=>a.map(r=>({id:r.id,name:r.name,sub:r.sub,n:r.snap.data.items.length,space:r.snap.data.space,updated:r.updated})).sort((a,b)=>b.updated-a.updated)),
   get:id=>tx("readonly",s=>s.get(id)).then(r=>r&&r.snap),
   save:(id,snap)=>tx("readwrite",s=>s.put({id,name:snap.data.name,sub:snap.data.sub,updated:Date.now(),snap})),
   create(snap){const id=S.uid();return S.save(id,snap).then(()=>id)},

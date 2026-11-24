@@ -14,7 +14,7 @@ function loop(t){requestAnimationFrame(loop);const dt=Math.min(.05,(t-last)/1000
  screens.forEach(s=>{if(Math.hypot(s.g.position.x-px,s.g.position.z-pz)>14)return;const x=s.c.getContext("2d"),r=rnd(s.it.id);
   x.fillStyle="#08090c";x.fillRect(0,0,320,180);for(let i=0;i<9;i++){x.fillStyle=`hsl(${r()*360},60%,${35+Math.sin(t/600+i)*15}%)`;const w=40+r()*120;x.fillRect((r()*320+t/40*(i+1))%360-40,i*20,w,12)}
   x.fillStyle="#0009";x.beginPath();x.arc(160,90,28,0,7);x.fill();x.fillStyle="#fff";x.beginPath();x.moveTo(151,75);x.lineTo(151,105);x.lineTo(176,90);x.fill();s.tex.needsUpdate=true});
- const ri=roomAt(pz),r=rooms[ri];curRoom=ri;
+ const ri=areaAt(px,pz),r=rooms[ri];curRoom=ri;
  if(doorsOpen){$("#room").innerHTML=r?`<b>${r.name}</b><span>${r.range}</span>`:`<b>${DATA.name}</b><span>${DATA.sub}</span>`}
  if(AC)gains.forEach((g,i)=>g.gain.setTargetAtTime(i==ri?1:0,AC.currentTime,.8));
  R.render(scene,cam)}
